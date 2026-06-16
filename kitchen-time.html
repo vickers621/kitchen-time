@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kitchen Time">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F4EE">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%234E9D52'/%3E%3Cpath d='M90 130 V78' stroke='%23F2F4EE' stroke-width='9' stroke-linecap='round'/%3E%3Cpath d='M90 86 C90 64 70 54 52 56 C52 78 70 90 90 86 Z' fill='%23F2F4EE'/%3E%3Cpath d='M90 76 C90 56 108 46 126 50 C124 70 108 80 90 76 Z' fill='%23F2F4EE'/%3E%3C/svg%3E">
+<title>Kitchen Time</title>
+<style>
+  :root{
+    --bg:#F2F4EE;
+    --card:#FFFFFF;
+    --ink:#21302A;
+    --muted:#6B7A70;
+    --line:#E4E8DF;
+    --track:#E9ECE3;
+    --tomato:#E25A2B;
+    --tomato-soft:#FBE7DE;
+    --leaf:#4E9D52;
+    --leaf-soft:#E3F0E2;
+    --gold:#E8A93A;
+    --shadow:0 1px 2px rgba(33,48,42,.04),0 8px 24px rgba(33,48,42,.06);
+    --round:#ui-rounded;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:max(env(safe-area-inset-top),18px) 18px calc(env(safe-area-inset-bottom) + 28px);
+    max-width:520px;margin:0 auto;
+    overscroll-behavior-y:none;
+  }
+  .rounded{font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;}
+  h1,h2,h3{margin:0;font-weight:700;}
+
+  header{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 18px;}
+  header .title{font-family:ui-rounded,"SF Pro Rounded",system-ui;font-size:21px;font-weight:800;letter-spacing:-.4px;}
+  header .title .sprout{color:var(--leaf);}
+  header .date{font-size:13px;color:var(--muted);font-weight:600;}
+
+  .card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:22px;margin-bottom:14px;}
+
+  /* TODAY */
+  .today{text-align:center;padding-top:26px;padding-bottom:24px;}
+  .ringwrap{position:relative;width:208px;height:208px;margin:0 auto 8px;}
+  .ringwrap svg{transform:rotate(-90deg);}
+  .ring-track{stroke:var(--track);}
+  .ring-fill{stroke:var(--tomato);stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.22,1,.36,1);}
+  .ring-fill.met{stroke:var(--leaf);}
+  .ringcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .bignum{font-family:ui-rounded,"SF Pro Rounded",system-ui;font-size:58px;font-weight:800;line-height:.9;letter-spacing:-1px;}
+  .bigunit{font-size:14px;color:var(--muted);font-weight:700;margin-top:6px;text-transform:lowercase;letter-spacing:.2px;}
+  .goalline{font-size:13px;color:var(--muted);font-weight:600;margin-top:2px;}
+  .goalline b{color:var(--ink);}
+  .met-badge{display:inline-flex;align-items:center;gap:5px;background:var(--leaf-soft);color:var(--leaf);font-weight:700;font-size:12.5px;padding:5px 11px;border-radius:999px;margin-top:12px;}
+
+  /* quick add */
+  .quick{display:flex;gap:9px;margin-top:20px;}
+  .quick button{flex:1;border:none;background:var(--tomato-soft);color:var(--tomato);font-family:ui-rounded,system-ui;font-weight:800;font-size:16px;padding:14px 0;border-radius:15px;cursor:pointer;transition:transform .08s,background .15s;}
+  .quick button:active{transform:scale(.95);background:#f7d8cb;}
+
+  /* timer */
+  .timer{display:flex;align-items:center;gap:13px;margin-top:14px;background:var(--bg);border-radius:15px;padding:12px 14px;}
+  .timer .readout{font-family:ui-rounded,system-ui;font-size:24px;font-weight:800;letter-spacing:.5px;flex:1;font-variant-numeric:tabular-nums;}
+  .timer .readout span{color:var(--muted);font-size:13px;font-weight:600;display:block;letter-spacing:0;margin-top:1px;}
+  .timer button{border:none;border-radius:12px;padding:12px 20px;font-family:ui-rounded,system-ui;font-weight:800;font-size:15px;cursor:pointer;transition:transform .08s;}
+  .timer button:active{transform:scale(.94);}
+  .timer .start{background:var(--leaf);color:#fff;}
+  .timer .stop{background:var(--tomato);color:#fff;}
+
+  /* tags */
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;justify-content:center;}
+  .tag{border:1.5px solid var(--line);background:#fff;color:var(--muted);font-size:13px;font-weight:600;padding:7px 13px;border-radius:999px;cursor:pointer;transition:.12s;}
+  .tag.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  /* STREAK */
+  .streak{display:flex;align-items:center;gap:18px;}
+  .pot{position:relative;width:74px;height:74px;flex:none;}
+  .streak-meta{flex:1;}
+  .streak-num{font-family:ui-rounded,system-ui;font-size:34px;font-weight:800;line-height:1;}
+  .streak-num small{font-size:15px;color:var(--muted);font-weight:700;margin-left:4px;}
+  .streak-label{font-size:13.5px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.35;}
+  .streak-best{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:7px;}
+  .streak-best b{color:var(--leaf);}
+
+  /* WEEK */
+  .sectlabel{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:2px 4px 12px;}
+  .week{display:flex;justify-content:space-between;gap:6px;}
+  .day{flex:1;text-align:center;}
+  .day .dot{width:100%;aspect-ratio:1;max-width:34px;margin:0 auto 7px;border-radius:11px;background:var(--track);display:flex;align-items:center;justify-content:center;position:relative;transition:.2s;}
+  .day .dot.has{background:var(--tomato);}
+  .day .dot.met{background:var(--leaf);}
+  .day .dot.today{outline:2.5px solid var(--ink);outline-offset:2px;}
+  .day .dot .star{color:#fff;font-size:15px;line-height:1;}
+  .day .dd{font-size:11px;font-weight:700;color:var(--muted);}
+  .day.is-today .dd{color:var(--ink);}
+
+  /* TOTALS + SETTINGS */
+  .row{display:flex;align-items:center;justify-content:space-between;padding:15px 2px;border-top:1px solid var(--line);}
+  .row:first-child{border-top:none;}
+  .row .k{font-size:14.5px;font-weight:600;}
+  .row .k small{display:block;color:var(--muted);font-weight:500;font-size:12.5px;margin-top:2px;}
+  .row .v{font-family:ui-rounded,system-ui;font-weight:800;font-size:18px;}
+  .stepper{display:flex;align-items:center;gap:14px;}
+  .stepper button{width:34px;height:34px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:20px;font-weight:700;color:var(--ink);cursor:pointer;line-height:1;}
+  .stepper button:active{background:var(--bg);}
+  .stepper .val{font-family:ui-rounded,system-ui;font-weight:800;font-size:17px;min-width:62px;text-align:center;}
+
+  .foot{text-align:center;color:var(--muted);font-size:12px;line-height:1.5;margin-top:18px;padding:0 14px;}
+  .reset{background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;margin-top:10px;}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+  <header>
+    <div class="title">Kitchen&nbsp;Time<span class="sprout"> ⌁</span></div>
+    <div class="date" id="dateLabel"></div>
+  </header>
+
+  <!-- TODAY -->
+  <div class="card today">
+    <div class="ringwrap">
+      <svg width="208" height="208" viewBox="0 0 208 208">
+        <circle class="ring-track" cx="104" cy="104" r="92" fill="none" stroke-width="16"/>
+        <circle id="ringFill" class="ring-fill" cx="104" cy="104" r="92" fill="none" stroke-width="16" stroke-dasharray="578" stroke-dashoffset="578"/>
+      </svg>
+      <div class="ringcenter">
+        <div class="bignum rounded" id="todayMin">0</div>
+        <div class="bigunit">min today</div>
+      </div>
+    </div>
+    <div class="goalline">goal: <b id="goalLabel">60</b> min · <span id="remainLabel"></span></div>
+    <div id="metBadge" class="met-badge" style="display:none">✓ Hour in the kitchen — nice</div>
+
+    <div class="timer">
+      <div class="readout rounded" id="timerReadout">00:00<span>tap start when you begin</span></div>
+      <button class="start" id="timerBtn">Start</button>
+    </div>
+
+    <div class="quick">
+      <button data-add="10">+10</button>
+      <button data-add="20">+20</button>
+      <button data-add="30">+30</button>
+    </div>
+
+    <div class="tags" id="tagRow">
+      <div class="tag" data-tag="Cooked">Cooked</div>
+      <div class="tag" data-tag="Meal prep">Meal prep</div>
+      <div class="tag" data-tag="Shopped">Shopped</div>
+      <div class="tag" data-tag="Farmers market">Farmers market</div>
+    </div>
+  </div>
+
+  <!-- STREAK -->
+  <div class="card streak">
+    <div class="pot">
+      <svg viewBox="0 0 74 74" width="74" height="74" id="sproutSvg"></svg>
+    </div>
+    <div class="streak-meta">
+      <div class="streak-num rounded"><span id="streakNum">0</span><small>day<span id="streakPlural">s</span></small></div>
+      <div class="streak-label" id="streakLabel">Spend any time on food today to start your streak.</div>
+      <div class="streak-best">Best run: <b id="bestStreak">0</b> days</div>
+    </div>
+  </div>
+
+  <!-- WEEK -->
+  <div class="card">
+    <div class="sectlabel">This week</div>
+    <div class="week" id="weekRow"></div>
+  </div>
+
+  <!-- TOTALS + SETTINGS -->
+  <div class="card">
+    <div class="row">
+      <div class="k">Total time invested<small>since you started</small></div>
+      <div class="v" id="totalTime">0h</div>
+    </div>
+    <div class="row">
+      <div class="k">Days you showed up</div>
+      <div class="v" id="activeDays">0</div>
+    </div>
+    <div class="row">
+      <div class="k">Daily goal<small>the bar that earns a ✓</small></div>
+      <div class="stepper">
+        <button id="goalDown">–</button>
+        <div class="val rounded"><span id="goalVal">60</span>m</div>
+        <button id="goalUp">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    A streak day is any day you spend time feeding yourself well — showing up counts.<br>
+    <button class="reset" id="resetBtn">Reset all data</button>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY="kitchenTime.v1";
+  var GOAL_DEFAULT=60, GOAL_MIN=15, GOAL_MAX=180, GOAL_STEP=15;
+  var RING_CIRC=578; // 2*pi*92
+
+  // ---------- storage ----------
+  function load(){
+    try{ var raw=localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return {goalMin:GOAL_DEFAULT, logs:{}};
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  var state=load();
+  if(!state.logs) state.logs={};
+  if(!state.goalMin) state.goalMin=GOAL_DEFAULT;
+
+  // ---------- dates ----------
+  function dayKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function today(){ return new Date(); }
+  function shiftKey(base,n){ var d=new Date(base); d.setDate(d.getDate()+n); return dayKey(d); }
+  function entry(k){ if(!state.logs[k]) state.logs[k]={min:0,tags:[]}; return state.logs[k]; }
+
+  // ---------- computed ----------
+  function todayMin(){ var k=dayKey(today()); return state.logs[k]?state.logs[k].min:0; }
+  function metGoal(min){ return min>=state.goalMin; }
+
+  function currentStreak(){
+    var has=function(k){ return state.logs[k]&&state.logs[k].min>0; };
+    var t=today();
+    var anchor=null;
+    if(has(dayKey(t))) anchor=new Date(t);
+    else { var y=new Date(t); y.setDate(y.getDate()-1); if(has(dayKey(y))) anchor=y; }
+    if(!anchor) return 0;
+    var count=0, d=new Date(anchor);
+    while(has(dayKey(d))){ count++; d.setDate(d.getDate()-1); }
+    return count;
+  }
+  function bestStreak(){
+    var keys=Object.keys(state.logs).filter(function(k){return state.logs[k].min>0;}).sort();
+    if(!keys.length) return 0;
+    var best=1, run=1;
+    for(var i=1;i<keys.length;i++){
+      var prev=new Date(keys[i-1]+"T00:00:00"), cur=new Date(keys[i]+"T00:00:00");
+      var diff=Math.round((cur-prev)/86400000);
+      if(diff===1){ run++; } else { run=1; }
+      if(run>best) best=run;
+    }
+    return Math.max(best, currentStreak());
+  }
+  function totalMinutes(){ var s=0; for(var k in state.logs) s+=state.logs[k].min; return s; }
+  function activeDays(){ var n=0; for(var k in state.logs) if(state.logs[k].min>0) n++; return n; }
+
+  // ---------- sprout art (grows with streak) ----------
+  function drawSprout(streak){
+    var stage=Math.min(streak,6); // 0..6
+    var leaf="#4E9D52", soil="#C9CFC2", pot="#E25A2B";
+    var stemTop=58-stage*5.5; // taller stem as streak grows
+    var s='';
+    // pot
+    s+='<path d="M20 50 H54 L50 70 H24 Z" fill="'+pot+'"/>';
+    s+='<rect x="17" y="44" width="40" height="9" rx="4" fill="'+pot+'"/>';
+    s+='<rect x="22" y="46" width="30" height="4" rx="2" fill="'+soil+'"/>';
+    if(stage===0){
+      s+='<circle cx="37" cy="48" r="2.5" fill="'+soil+'"/>';
+    } else {
+      s+='<path d="M37 48 V'+stemTop+'" stroke="'+leaf+'" stroke-width="3" stroke-linecap="round"/>';
+      // leaves appear progressively
+      if(stage>=1) s+='<path d="M37 '+(stemTop+6)+' C30 '+(stemTop+2)+' 26 '+(stemTop+9)+' 26 '+(stemTop+15)+' C33 '+(stemTop+15)+' 37 '+(stemTop+11)+' 37 '+(stemTop+6)+' Z" fill="'+leaf+'"/>';
+      if(stage>=2) s+='<path d="M37 '+(stemTop+4)+' C44 '+(stemTop)+' 48 '+(stemTop+7)+' 48 '+(stemTop+13)+' C41 '+(stemTop+13)+' 37 '+(stemTop+9)+' 37 '+(stemTop+4)+' Z" fill="'+leaf+'"/>';
+      if(stage>=4) s+='<path d="M37 '+(stemTop-1)+' C31 '+(stemTop-5)+' 28 '+(stemTop+1)+' 28 '+(stemTop+6)+' C34 '+(stemTop+6)+' 37 '+(stemTop+3)+' 37 '+(stemTop-1)+' Z" fill="'+leaf+'"/>';
+      if(stage>=6) s+='<circle cx="37" cy="'+(stemTop-3)+'" r="4.5" fill="'+pot+'"/>';
+    }
+    document.getElementById("sproutSvg").innerHTML=s;
+  }
+
+  // ---------- render ----------
+  function render(){
+    var t=today();
+    document.getElementById("dateLabel").textContent=t.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
+    var tm=todayMin(), goal=state.goalMin, met=metGoal(tm);
+
+    document.getElementById("todayMin").textContent=tm;
+    document.getElementById("goalLabel").textContent=goal;
+    document.getElementById("goalVal").textContent=goal;
+    document.getElementById("remainLabel").textContent=met?"done for today":(goal-tm)+" to go";
+
+    var pct=Math.min(tm/goal,1);
+    var ring=document.getElementById("ringFill");
+    ring.style.strokeDashoffset=RING_CIRC*(1-pct);
+    ring.classList.toggle("met",met);
+    document.getElementById("metBadge").style.display=met?"inline-flex":"none";
+
+    // tags
+    var todayTags=(state.logs[dayKey(t)]&&state.logs[dayKey(t)].tags)||[];
+    Array.prototype.forEach.call(document.querySelectorAll(".tag"),function(el){
+      el.classList.toggle("on",todayTags.indexOf(el.dataset.tag)>=0);
+    });
+
+    // streak
+    var cs=currentStreak();
+    document.getElementById("streakNum").textContent=cs;
+    document.getElementById("streakPlural").textContent=cs===1?"":"s";
+    document.getElementById("bestStreak").textContent=bestStreak();
+    var lbl;
+    if(cs===0) lbl="Spend any time on food today to start your streak.";
+    else if(tm>0) lbl="You've shown up "+cs+" day"+(cs===1?"":"s")+" running. Keep it growing.";
+    else lbl="Streak's alive at "+cs+". Spend a little time today to keep it going.";
+    document.getElementById("streakLabel").textContent=lbl;
+    drawSprout(cs);
+
+    // week
+    var wr=document.getElementById("weekRow"); wr.innerHTML="";
+    var names=["S","M","T","W","T","F","S"];
+    for(var i=6;i>=0;i--){
+      var d=new Date(t); d.setDate(d.getDate()-i);
+      var k=dayKey(d), e=state.logs[k], min=e?e.min:0, isToday=(i===0);
+      var cls="dot"; if(min>0) cls+=" has"; if(metGoal(min)) cls+=" met"; if(isToday) cls+=" today";
+      var star=metGoal(min)?'<span class="star">✦</span>':'';
+      wr.innerHTML+='<div class="day'+(isToday?" is-today":"")+'"><div class="'+cls+'">'+star+'</div><div class="dd">'+names[d.getDay()]+'</div></div>';
+    }
+
+    // totals
+    var tot=totalMinutes();
+    document.getElementById("totalTime").textContent=(tot>=60?Math.floor(tot/60)+"h "+(tot%60>0?(tot%60)+"m":""):tot+"m").trim();
+    document.getElementById("activeDays").textContent=activeDays();
+
+    save();
+  }
+
+  // ---------- actions ----------
+  function addMinutes(n){
+    if(n<=0) return;
+    var e=entry(dayKey(today())); e.min+=n; render();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".quick button"),function(b){
+    b.addEventListener("click",function(){ addMinutes(parseInt(b.dataset.add,10)); });
+  });
+
+  // tags
+  document.getElementById("tagRow").addEventListener("click",function(ev){
+    var el=ev.target.closest(".tag"); if(!el) return;
+    var e=entry(dayKey(today())); var tg=el.dataset.tag;
+    var i=e.tags.indexOf(tg);
+    if(i>=0) e.tags.splice(i,1); else e.tags.push(tg);
+    render();
+  });
+
+  // timer
+  var timerStart=null, timerInt=null;
+  function fmt(ms){ var s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+  function tickTimer(){ document.getElementById("timerReadout").firstChild.textContent=fmt(Date.now()-timerStart); }
+  document.getElementById("timerBtn").addEventListener("click",function(){
+    var btn=this, ro=document.getElementById("timerReadout");
+    if(timerStart===null){
+      timerStart=Date.now();
+      btn.textContent="Stop"; btn.className="stop";
+      ro.querySelector("span").textContent="counting…";
+      tickTimer(); timerInt=setInterval(tickTimer,1000);
+    } else {
+      clearInterval(timerInt);
+      var mins=Math.round((Date.now()-timerStart)/60000);
+      timerStart=null; btn.textContent="Start"; btn.className="start";
+      ro.firstChild.textContent="00:00";
+      ro.querySelector("span").textContent=mins>0?("logged "+mins+" min"):"under a minute — not logged";
+      addMinutes(mins);
+    }
+  });
+
+  // goal stepper
+  document.getElementById("goalUp").addEventListener("click",function(){ state.goalMin=Math.min(GOAL_MAX,state.goalMin+GOAL_STEP); render(); });
+  document.getElementById("goalDown").addEventListener("click",function(){ state.goalMin=Math.max(GOAL_MIN,state.goalMin-GOAL_STEP); render(); });
+
+  // reset
+  document.getElementById("resetBtn").addEventListener("click",function(){
+    if(confirm("Clear all logged time and start fresh?")){ state={goalMin:GOAL_DEFAULT,logs:{}}; render(); }
+  });
+
+  // re-render if app resumes on a new day
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
